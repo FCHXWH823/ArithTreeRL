@@ -1,6 +1,64 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+adder.py - Parallel Prefix Adder Design Optimization using Monte Carlo Tree Search (MCTS)
+
+INTRODUCTION:
+============
+This module implements an automated approach to design and optimize parallel prefix adders
+using Monte Carlo Tree Search (MCTS). Parallel prefix adders are critical components in 
+digital arithmetic circuits, trading off between speed (logic depth/level) and area (gate count/size).
+
+KEY CONCEPTS:
+------------
+1. Cell Map: An INPUT_BIT x INPUT_BIT matrix representing the adder structure, where each cell
+   indicates whether a prefix computation unit exists at position (i,j). The diagonal represents
+   direct signal propagation.
+
+2. Level Map: Tracks the critical path depth for each cell, determining the circuit's latency.
+
+3. Min Map: Identifies removable cells - cells that can be eliminated while maintaining 
+   correctness through the legalization process.
+
+4. State: Represents a specific adder configuration with its level (depth), size (gate count),
+   and associated maps (cell_map, level_map, min_map).
+
+DESIGN PROCESS:
+--------------
+The algorithm starts with a known adder structure (Sklansky, Brent-Kung, or custom) and 
+iteratively explores the design space by:
+1. Removing cells from the current design (reducing size)
+2. Ensuring the design remains valid through legalization
+3. Evaluating the trade-off between level and size
+4. Using MCTS to guide the search toward optimal designs
+
+STATE REPRESENTATION:
+--------------------
+- level: Maximum depth in the level_map (circuit delay)
+- size: Number of prefix cells beyond the diagonal (circuit area)
+- cell_map: Binary matrix indicating cell presence
+- level_map: Integer matrix with critical path depths
+- min_map: Binary matrix marking removable cells
+- action: The specific cell removal operation taken
+- step_num: Number of operations from the initial state
+
+SEARCH ALGORITHM (MCTS):
+-----------------------
+1. Tree Policy: Select promising nodes to explore using UCB1 formula
+2. Expansion: Generate new child states by removing cells
+3. Default Policy: Random rollout to terminal states
+4. Backup: Propagate rewards up the tree to update node statistics
+
+The algorithm seeks Pareto-optimal designs balancing minimal size with acceptable level 
+constraints, defined by LEVEL_BOUND_DELTA parameter.
+
+OUTPUT:
+-------
+The search saves discovered adder configurations to cell_map/ directory, organized by
+bit-width, level, and size. These can be used for hardware synthesis and evaluation.
+"""
+
 import sys
 import math
 import random
@@ -44,6 +102,7 @@ class State(object):
         self.current_round_index = 0
         self.input_bit = INPUT_BIT
         self.cumulative_choices = []
+        self.generation_trace = []  # Track operation at each step
         self.level = level
         self.cell_map = cell_map
         self.level_map = level_map
@@ -232,9 +291,69 @@ class State(object):
                 next_level_map, next_min_map, 
                 next_step_num, action, reward)
             self.cumulative_choices.append(action)
+            
+            # Track the generation trace for this step
+            next_state.generation_trace = self.generation_trace.copy()
+            operation_info = {
+                'step': next_step_num,
+                'action': action,
+                'action_type': 'remove_cell',
+                'position': (x, y),
+                'prev_level': self.level,
+                'next_level': next_level,
+                'prev_size': self.size,
+                'next_size': next_size,
+                'reward': reward
+            }
+            next_state.generation_trace.append(operation_info)
+            
             return next_state
         
         return None
+
+    def output_generation_trace(self, file_name=None):
+        """
+        Output the generation trace showing the operation at each step.
+        
+        Args:
+            file_name (str, optional): Path to save the trace. If None, prints to console.
+        
+        Returns:
+            str: Formatted trace string
+        """
+        if len(self.generation_trace) == 0:
+            trace_str = "No operations performed - this is the initial state.\n"
+            trace_str += "Initial State: level={}, size={}\n".format(self.level, self.size)
+        else:
+            trace_str = "Generation Trace for Adder Design:\n"
+            trace_str += "=" * 80 + "\n"
+            trace_str += "Input Bit Width: {}\n".format(self.input_bit)
+            trace_str += "Final Level (Depth): {}\n".format(self.level)
+            trace_str += "Final Size (Gate Count): {}\n".format(self.size)
+            trace_str += "Total Steps: {}\n".format(len(self.generation_trace))
+            trace_str += "=" * 80 + "\n\n"
+            
+            for op in self.generation_trace:
+                trace_str += "Step {}: {} at position ({}, {})\n".format(
+                    op['step'], op['action_type'], op['position'][0], op['position'][1])
+                trace_str += "  Action ID: {}\n".format(op['action'])
+                trace_str += "  Level: {} -> {} (change: {:+d})\n".format(
+                    op['prev_level'], op['next_level'], 
+                    int(op['next_level'] - op['prev_level']))
+                trace_str += "  Size:  {} -> {} (change: {:+d})\n".format(
+                    op['prev_size'], op['next_size'],
+                    int(op['next_size'] - op['prev_size']))
+                trace_str += "  Reward: {:.2f}\n".format(op['reward'])
+                trace_str += "-" * 80 + "\n"
+        
+        if file_name is not None:
+            with open(file_name, 'w') as f:
+                f.write(trace_str)
+            print("Generation trace saved to: {}".format(file_name))
+        else:
+            print(trace_str)
+        
+        return trace_str
 
     def __repr__(self):
         return "State: {}, level: {}, choices: {}".format(

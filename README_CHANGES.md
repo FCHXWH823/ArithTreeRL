@@ -46,26 +46,34 @@ python demo_trace_functionality.py
 - Added `generation_trace` attribute to track operations (1 line)
 - Modified `get_next_state_with_random_choice()` to record operations (15 lines)
 - Added `output_generation_trace()` method to display/save traces (45 lines)
+- **Modified `legalize()` to track cells added during legalization (2 lines)** [NEW]
+- **Updated trace to include legalization effects (1 line)** [NEW]
+- **Enhanced trace output to display legalization information (8 lines)** [NEW]
 
 ### New Files
 - `test_generation_trace.py` - Working test demonstrating the functionality
 - `demo_trace_functionality.py` - Comprehensive demonstration
 - `GENERATION_TRACE.md` - Detailed documentation of the feature
 - `IMPLEMENTATION_SUMMARY.md` - Complete explanation of what was done
+- `LEGALIZATION_TRACKING.md` - Detailed explanation of legalization tracking [NEW]
+- `test_legalization_tracking.py` - Comprehensive test for legalization tracking [NEW]
 - `.gitignore` - Excludes build artifacts
 
 ## Benefits
 
 1. **Better Understanding**: New users can quickly learn what the code does
 2. **Transparency**: See exactly how designs are generated step-by-step
-3. **Debugging**: Trace helps identify issues in the optimization process
-4. **Analysis**: Historical data enables studying successful strategies
-5. **No Breaking Changes**: All existing functionality is preserved
+3. **Legalization Insight**: Track when and why cells are added during legalization [NEW]
+4. **Complete Information**: Understand both cell removals and additions [NEW]
+5. **Debugging**: Trace helps identify issues in the optimization process
+6. **Analysis**: Historical data enables studying successful strategies
+7. **No Breaking Changes**: All existing functionality is preserved
 
 ## Documentation
 
 - **IMPLEMENTATION_SUMMARY.md** - Complete overview of changes and rationale
 - **GENERATION_TRACE.md** - Detailed documentation of the trace feature
+- **LEGALIZATION_TRACKING.md** - Explanation of legalization tracking enhancement [NEW]
 - Module docstring in `adder.py` - Comprehensive introduction to the system
 
 ## Testing
@@ -75,7 +83,9 @@ All changes have been tested:
 - ✅ Test script runs without errors
 - ✅ Demo script produces expected output
 - ✅ Trace can be saved to files
+- ✅ Legalization tracking works correctly [NEW]
+- ✅ Both single and multiple cell additions are tracked [NEW]
 - ✅ Backward compatible with existing code
 
-Total lines added: ~700 (mostly documentation and tests)
-Core functional changes: ~60 lines
+Total lines added: ~800 (mostly documentation and tests)
+Core functional changes: ~70 lines

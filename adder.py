@@ -216,6 +216,7 @@ class State(object):
             min_map[i, i] = 0
         x = start_bit
         activate_x_list = [start_bit]
+        added_cells = []  # Track cells added during legalization
         assert self.input_bit <= 256
         for x in range(self.input_bit-1, 0, -1):
             last_y = x
@@ -226,10 +227,11 @@ class State(object):
                         next_bit = last_y - 1
                         cell_map[last_y-1, y] = 1
                         activate_x_list.append(next_bit)
+                        added_cells.append((last_y-1, y))  # Record added cell
                     if min_map[last_y-1,y] == 1:
                         min_map[last_y-1, y] = 0
                     last_y = y
-        return cell_map, min_map, activate_x_list
+        return cell_map, min_map, activate_x_list, added_cells
     
     def update_level_map(self, cell_map, level_map, start_bit = 1, activate_x_list = []):
         activate_x_list.reverse()
@@ -270,7 +272,7 @@ class State(object):
             assert self.cell_map[x, y] == 1
             next_cell_map[x, y] = 0
             next_min_map[x, y] = 0
-            next_cell_map, next_min_map, activate_x_list = self.legalize(next_cell_map, next_min_map, start_bit = x)
+            next_cell_map, next_min_map, activate_x_list, added_cells = self.legalize(next_cell_map, next_min_map, start_bit = x)
             next_level_map = self.update_level_map(next_cell_map, next_level_map, start_bit = x, activate_x_list = activate_x_list)
             next_level = next_level_map.max()
             next_size = next_cell_map.sum() - self.input_bit
@@ -303,7 +305,8 @@ class State(object):
                 'next_level': next_level,
                 'prev_size': self.size,
                 'next_size': next_size,
-                'reward': reward
+                'reward': reward,
+                'legalization_added_cells': added_cells  # Track cells added during legalization
             }
             next_state.generation_trace.append(operation_info)
             
@@ -337,6 +340,16 @@ class State(object):
                 trace_str += "Step {}: {} at position ({}, {})\n".format(
                     op['step'], op['action_type'], op['position'][0], op['position'][1])
                 trace_str += "  Action ID: {}\n".format(op['action'])
+                
+                # Display legalization effects if any cells were added
+                if 'legalization_added_cells' in op and len(op['legalization_added_cells']) > 0:
+                    trace_str += "  Legalization: {} cell(s) added: {}\n".format(
+                        len(op['legalization_added_cells']),
+                        ', '.join(['({}, {})'.format(c[0], c[1]) for c in op['legalization_added_cells']])
+                    )
+                else:
+                    trace_str += "  Legalization: No cells added\n"
+                
                 trace_str += "  Level: {} -> {} (change: {:+d})\n".format(
                     op['prev_level'], op['next_level'], 
                     int(op['next_level'] - op['prev_level']))

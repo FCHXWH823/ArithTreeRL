@@ -54,6 +54,16 @@ class SimpleState:
                 trace_str += "Step {}: {} at position ({}, {})\n".format(
                     op['step'], op['action_type'], op['position'][0], op['position'][1])
                 trace_str += "  Action ID: {}\n".format(op['action'])
+                
+                # Display legalization effects if any cells were added
+                if 'legalization_added_cells' in op and len(op['legalization_added_cells']) > 0:
+                    trace_str += "  Legalization: {} cell(s) added: {}\n".format(
+                        len(op['legalization_added_cells']),
+                        ', '.join(['({}, {})'.format(c[0], c[1]) for c in op['legalization_added_cells']])
+                    )
+                else:
+                    trace_str += "  Legalization: No cells added\n"
+                
                 trace_str += "  Level: {} -> {} (change: {:+d})\n".format(
                     op['prev_level'], op['next_level'], 
                     int(op['next_level'] - op['prev_level']))
@@ -129,7 +139,8 @@ def test_generation_trace():
             'next_level': 4,
             'prev_size': 12,
             'next_size': 11,
-            'reward': -1.0
+            'reward': -1.0,
+            'legalization_added_cells': []  # No cells added
         },
         {
             'step': 2,
@@ -140,7 +151,8 @@ def test_generation_trace():
             'next_level': 4,
             'prev_size': 11,
             'next_size': 10,
-            'reward': -1.0
+            'reward': -1.0,
+            'legalization_added_cells': [(3, 2)]  # One cell added during legalization
         },
         {
             'step': 3,
@@ -151,7 +163,8 @@ def test_generation_trace():
             'next_level': 4,
             'prev_size': 10,
             'next_size': 10,
-            'reward': -2.5
+            'reward': -2.5,
+            'legalization_added_cells': [(4, 3), (5, 3)]  # Two cells added during legalization
         }
     ]
     

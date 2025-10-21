@@ -21,3 +21,8 @@ dist/
 
 # Test outputs
 /tmp/
+
+# Dataset files (uncomment if you don't want to commit datasets)
+# dataset/
+# *.jsonl
+# *.json

@@ -1,0 +1,229 @@
+# Dataset Generation Configuration Examples
+
+# This file contains various configuration examples for generating datasets
+# for different training scenarios. Copy and modify these configurations
+# for your specific use case.
+
+# =============================================================================
+# Example 1: Quick Testing Dataset (Small, Fast)
+# =============================================================================
+# Use this for rapid iteration and testing your training pipeline
+[quick_test]
+input_bit = 8
+num_trajectories = 5
+max_steps = 10
+sample_strategy = random
+level_bound_delta = 1
+init_type = sklansky
+openr1_format = true
+seed = 42
+
+# Usage:
+# python generate_dataset.py --input_bit=8 --num_trajectories=5 --max_steps=10 \
+#   --sample_strategy=random --level_bound_delta=1 --openr1_format
+
+
+# =============================================================================
+# Example 2: Supervised Fine-Tuning (SFT) Dataset
+# =============================================================================
+# Balanced dataset for supervised fine-tuning with diverse examples
+[sft_training]
+input_bit = 16
+num_trajectories = 100
+max_steps = 30
+sample_strategy = random
+level_bound_delta = 2
+init_type = sklansky
+openr1_format = true
+seed = 42
+
+# Usage:
+# python generate_dataset.py --input_bit=16 --num_trajectories=100 --max_steps=30 \
+#   --sample_strategy=random --level_bound_delta=2 --openr1_format
+
+
+# =============================================================================
+# Example 3: GRPO/RL Training Dataset
+# =============================================================================
+# Diverse dataset with varying rewards for reinforcement learning
+[grpo_training]
+input_bit = 32
+num_trajectories = 200
+max_steps = 50
+sample_strategy = random
+level_bound_delta = 3
+init_type = brent_kung
+openr1_format = true
+seed = 42
+
+# Usage:
+# python generate_dataset.py --input_bit=32 --num_trajectories=200 --max_steps=50 \
+#   --sample_strategy=random --level_bound_delta=3 --init_type=brent_kung --openr1_format
+
+
+# =============================================================================
+# Example 4: Expert Demonstrations Dataset
+# =============================================================================
+# High-quality optimal trajectories for learning best practices
+[expert_demonstrations]
+input_bit = 16
+num_trajectories = 50
+max_steps = 40
+sample_strategy = best
+level_bound_delta = 2
+init_type = sklansky
+openr1_format = true
+seed = 42
+
+# Usage:
+# python generate_dataset.py --input_bit=16 --num_trajectories=50 --max_steps=40 \
+#   --sample_strategy=best --level_bound_delta=2 --openr1_format
+
+
+# =============================================================================
+# Example 5: Comprehensive Coverage Dataset
+# =============================================================================
+# All valid actions from each state for maximum coverage
+[comprehensive_coverage]
+input_bit = 8
+num_trajectories = 20
+max_steps = 15
+sample_strategy = all_valid
+level_bound_delta = 2
+init_type = sklansky
+openr1_format = true
+seed = 42
+
+# Usage:
+# python generate_dataset.py --input_bit=8 --num_trajectories=20 --max_steps=15 \
+#   --sample_strategy=all_valid --level_bound_delta=2 --openr1_format
+
+
+# =============================================================================
+# Example 6: Multi-Size Mixed Dataset
+# =============================================================================
+# Generate datasets for multiple bit widths and combine them
+[multi_size_mixed]
+# Run this with a shell script:
+# for bits in 8 16 32; do
+#   python generate_dataset.py --input_bit=$bits --num_trajectories=30 \
+#     --max_steps=30 --level_bound_delta=2 --output_dir=dataset_mixed --openr1_format
+# done
+
+
+# =============================================================================
+# Example 7: From Suboptimal Starting Point
+# =============================================================================
+# Start from less optimal structures for learning large improvements
+[from_suboptimal]
+input_bit = 16
+num_trajectories = 50
+max_steps = 40
+sample_strategy = random
+level_bound_delta = 3
+init_type = normal
+openr1_format = true
+seed = 42
+
+# Usage:
+# python generate_dataset.py --input_bit=16 --num_trajectories=50 --max_steps=40 \
+#   --sample_strategy=random --level_bound_delta=3 --init_type=normal --openr1_format
+
+
+# =============================================================================
+# Example 8: Large-Scale Production Dataset
+# =============================================================================
+# Large dataset for production training
+[large_scale]
+input_bit = 64
+num_trajectories = 500
+max_steps = 100
+sample_strategy = random
+level_bound_delta = 2
+init_type = sklansky
+openr1_format = true
+seed = 42
+
+# Usage (may take several minutes):
+# python generate_dataset.py --input_bit=64 --num_trajectories=500 --max_steps=100 \
+#   --sample_strategy=random --level_bound_delta=2 --openr1_format
+
+
+# =============================================================================
+# Example 9: Curriculum Learning Dataset
+# =============================================================================
+# Generate datasets with increasing difficulty
+[curriculum_easy]
+input_bit = 8
+num_trajectories = 50
+max_steps = 20
+sample_strategy = random
+level_bound_delta = 2
+init_type = sklansky
+openr1_format = true
+seed = 42
+
+[curriculum_medium]
+input_bit = 16
+num_trajectories = 50
+max_steps = 30
+sample_strategy = random
+level_bound_delta = 2
+init_type = sklansky
+openr1_format = true
+seed = 42
+
+[curriculum_hard]
+input_bit = 32
+num_trajectories = 50
+max_steps = 50
+sample_strategy = random
+level_bound_delta = 1
+init_type = brent_kung
+openr1_format = true
+seed = 42
+
+# Usage (generate all three):
+# python generate_dataset.py --input_bit=8 --num_trajectories=50 --max_steps=20 \
+#   --level_bound_delta=2 --openr1_format --output_dir=curriculum/easy
+# python generate_dataset.py --input_bit=16 --num_trajectories=50 --max_steps=30 \
+#   --level_bound_delta=2 --openr1_format --output_dir=curriculum/medium
+# python generate_dataset.py --input_bit=32 --num_trajectories=50 --max_steps=50 \
+#   --level_bound_delta=1 --init_type=brent_kung --openr1_format --output_dir=curriculum/hard
+
+
+# =============================================================================
+# Tips for Choosing Parameters
+# =============================================================================
+#
+# input_bit:
+#   - 8: Fast generation, good for testing
+#   - 16: Balanced, good for most training
+#   - 32: More complex, longer trajectories
+#   - 64+: Production scale, may take time
+#
+# num_trajectories:
+#   - 5-10: Quick testing
+#   - 50-100: Small to medium training
+#   - 200-500: Large-scale training
+#   - 1000+: Production datasets
+#
+# max_steps:
+#   - 10-20: Short trajectories, fast
+#   - 30-50: Medium length, balanced
+#   - 100+: Long optimization paths
+#
+# sample_strategy:
+#   - random: Diverse, good for most cases
+#   - best: Optimal paths, expert demonstrations
+#   - all_valid: Complete coverage, large datasets
+#
+# level_bound_delta:
+#   - 0-1: Tight constraints, near-optimal
+#   - 2-3: Moderate flexibility, balanced
+#   - 4+: High flexibility, more exploration
+#
+# init_type:
+#   - sklansky: Near-optimal starting point
+#   - brent_kung: More room for optimization
+#   - normal: Maximum optimization potential

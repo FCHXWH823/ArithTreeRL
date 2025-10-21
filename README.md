@@ -33,6 +33,17 @@ python mult.py --input_bit=64 --area_w=0.01
 python mult.py --input_bit=128 --area_w=0.01
 ```
 
+- **NEW: Dataset generation for LLM finetuning/GRPO training**
+```
+# Collect training data during adder optimization
+python collect_training_data.py --input_bit=16 --seed=1 --max_steps=500 --level_bound_delta=1
+
+# Generate dataset from saved states
+python adder_with_dataset.py --mode=from_saved --input_bit=8
+```
+
+See [DATASET_GENERATION.md](DATASET_GENERATION.md) for detailed documentation.
+
 
 ## Expected output
 
@@ -232,5 +243,43 @@ If you find our paper or code useful in your research, please cite it.
   year={2024}
 }
 ```
+
+## Dataset Generation for LLM Training
+
+This repository now includes tools for generating training datasets from the adder optimization process,
+suitable for LLM finetuning and GRPO (Guided Reward Proximal Optimization) training with the OpenR1 framework.
+
+### Features
+
+- **State-to-text conversion**: Converts adder states to text representations for LLM input
+- **Action-to-text conversion**: Converts optimization actions to text for LLM output
+- **OpenR1 compatible format**: Generates datasets in JSONL format compatible with OpenR1
+- **Metadata tracking**: Includes rewards, level/size changes, and other optimization metrics
+- **Multiple collection modes**: Collect data during optimization or from saved states
+
+### Quick Start
+
+```bash
+# Collect training data during optimization
+python collect_training_data.py --input_bit=16 --seed=1 --max_steps=500 --level_bound_delta=1
+
+# Analyze generated dataset
+python example_training_integration.py --dataset=dataset/adder_training_16b_seed1_*.jsonl --mode=analyze
+
+# Mock finetuning example
+python example_training_integration.py --dataset=dataset/adder_training_16b_seed1_*.jsonl --mode=finetune
+```
+
+### Documentation
+
+- [DATASET_GENERATION.md](DATASET_GENERATION.md) - Comprehensive guide for dataset generation
+- [OPENR1_CONFIG.md](OPENR1_CONFIG.md) - OpenR1 configuration examples and integration guide
+
+### Dataset Format
+
+Each training sample contains:
+- **Input**: Current adder state (cell map, level, size, constraints)
+- **Output**: Optimization action (cell removal, position, expected impact)
+- **Metadata**: Rewards, state transitions, and performance metrics
 
 

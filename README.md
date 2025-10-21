@@ -16,6 +16,14 @@ python adder.py --input_bit=128 --level_bound_delta=0
 python adder.py --input_bit=128 --level_bound_delta=0 --demo
 ```
 
+- **Dataset generation for LLM finetuning/GRPO** (NEW!)
+
+```
+python generate_dataset.py --input_bit=16 --num_trajectories=50 --openr1_format
+```
+
+See [DATASET_GENERATION.md](DATASET_GENERATION.md) for detailed documentation on generating datasets for Large Language Model (LLM) finetuning or Guided Reward Proximal Optimization (GRPO) training using the OpenR1 framework.
+
 - Adder design (practical metrics)
 
 (Make sure the *utils/fast_flow.tcl* and *utils/full_flow.tcl* has been copied to *OpenROAD/test*)

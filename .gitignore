@@ -1,0 +1,36 @@
+# Dataset files
+dataset/
+dataset_*/
+*.jsonl
+openr1_dataset_*.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Generated files
+cell_map/
+time_log_*.log
+adder_prac_log/
+back_and_forth/
+run_verilog_mult_mid/
+run_verilog_mult_add_mid/
+
+# Temporary files
+*.log
+*.tmp
+/tmp/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db

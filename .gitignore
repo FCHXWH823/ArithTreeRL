@@ -1,5 +1,6 @@
 # Dataset files
 dataset/
+dataset_*/
 *.jsonl
 openr1_dataset_*.json
 
